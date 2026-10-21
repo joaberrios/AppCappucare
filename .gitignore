@@ -1,0 +1,33 @@
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Android Studio
+.gradle/
+build/
+**/build/
+local.properties
+*.iml
+.idea/
+
+# Respaldos
+*.respaldo
+*.respaldo.txt
+gradle.properties.respaldo
+
+# Archivos temporales
+*.log
+.DS_Store
+Thumbs.db
