@@ -329,6 +329,7 @@ fun FormularioProducto(
             singleLine = true
         )
 
+        com.example.appcappucare.ui.components.CamaraProducto()
         if (mensaje.isNotEmpty()) {
             Text(
                 mensaje,
@@ -365,6 +366,7 @@ fun FormularioProducto(
         }
     }
 }
+
 
 
 
