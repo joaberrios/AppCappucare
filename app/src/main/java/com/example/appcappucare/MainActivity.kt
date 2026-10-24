@@ -33,25 +33,29 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun CappucareApp(vm: ProductoViewModel) {
-    var mostrarFormulario by remember { mutableStateOf(false) }
+    var pantalla by remember { mutableStateOf("inicio") }
 
-    if (mostrarFormulario) {
-        FormularioProducto(
+    when (pantalla) {
+        "inicio" -> com.example.appcappucare.ui.screens.InicioScreen(
             vm = vm,
-            volver = { mostrarFormulario = false }
+            abrirInventario = { pantalla = "inventario" }
         )
-    } else {
-        PantallaInventario(
+
+        "agregar" -> FormularioProducto(
             vm = vm,
-            agregar = { mostrarFormulario = true }
+            volver = { pantalla = "inventario" }
+        )
+
+        else -> PantallaInventario(
+            vm = vm,
+            agregar = { pantalla = "agregar" }, volverInicio = { pantalla = "inicio" }
         )
     }
 }
-
 @Composable
 fun PantallaInventario(
     vm: ProductoViewModel,
-    agregar: () -> Unit
+    agregar: () -> Unit, volverInicio: () -> Unit
 ) {
     val productos by vm.productos.collectAsState()
 
@@ -82,6 +86,13 @@ fun PantallaInventario(
         )
 
         Text("Sistema de inventario médico")
+
+        OutlinedButton(
+            onClick = volverInicio,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Volver al inicio")
+        }
 
         Spacer(Modifier.height(16.dp))
 
@@ -334,4 +345,6 @@ fun FormularioProducto(
         }
     }
 }
+
+
 
