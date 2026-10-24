@@ -1,6 +1,10 @@
 ﻿package com.example.appcappucare
 
 import android.os.Bundle
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.togetherWith
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -35,21 +39,37 @@ class MainActivity : ComponentActivity() {
 fun CappucareApp(vm: ProductoViewModel) {
     var pantalla by remember { mutableStateOf("inicio") }
 
-    when (pantalla) {
-        "inicio" -> com.example.appcappucare.ui.screens.InicioScreen(
-            vm = vm,
-            abrirInventario = { pantalla = "inventario" }
-        )
+    AnimatedContent(
+        targetState = pantalla,
+        transitionSpec = {
+            slideIntoContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                animationSpec = tween(350)
+            ) togetherWith slideOutOfContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                animationSpec = tween(350)
+            )
+        },
+        label = "AnimacionPantallas"
+    ) { pantallaActual ->
 
-        "agregar" -> FormularioProducto(
-            vm = vm,
-            volver = { pantalla = "inventario" }
-        )
+        when (pantallaActual) {
+            "inicio" -> com.example.appcappucare.ui.screens.InicioScreen(
+                vm = vm,
+                abrirInventario = { pantalla = "inventario" }
+            )
 
-        else -> PantallaInventario(
-            vm = vm,
-            agregar = { pantalla = "agregar" }, volverInicio = { pantalla = "inicio" }
-        )
+            "agregar" -> FormularioProducto(
+                vm = vm,
+                volver = { pantalla = "inventario" }
+            )
+
+            else -> PantallaInventario(
+                vm = vm,
+                agregar = { pantalla = "agregar" },
+                volverInicio = { pantalla = "inicio" }
+            )
+        }
     }
 }
 @Composable
@@ -345,6 +365,7 @@ fun FormularioProducto(
         }
     }
 }
+
 
 
 
