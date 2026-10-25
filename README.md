@@ -57,3 +57,7 @@ El proyecto utiliza MVVM para separar la interfaz de usuario, la lógica de nego
 ## Repositorio
 
 https://github.com/joaberrios/AppCappucare
+
+## Desarrollador
+- Joaquin Berrios
+
