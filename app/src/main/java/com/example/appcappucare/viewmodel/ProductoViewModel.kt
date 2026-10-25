@@ -1,3 +1,4 @@
+﻿
 package com.example.appcappucare.viewmodel
 
 import android.app.Application
@@ -6,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.appcappucare.data.local.CappucareDatabase
 import com.example.appcappucare.model.Producto
 import com.example.appcappucare.repository.ProductoRepository
+import com.example.appcappucare.utils.NotificacionUtils
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -28,7 +30,9 @@ class ProductoViewModel(application: Application) : AndroidViewModel(application
         precio: String,
         stock: String,
         stockMinimo: String,
-        onResultado: (String, Boolean) -> Unit, fotoUri: String? = null) {
+        onResultado: (String, Boolean) -> Unit,
+        fotoUri: String? = null
+    ) {
         if (nombre.isBlank()) {
             onResultado("El nombre es obligatorio", false)
             return
@@ -82,7 +86,8 @@ class ProductoViewModel(application: Application) : AndroidViewModel(application
         id: Int,
         cantidad: Int,
         entrada: Boolean,
-        onResultado: (String, Boolean) -> Unit) {
+        onResultado: (String, Boolean) -> Unit
+    ) {
         if (cantidad <= 0) {
             onResultado("La cantidad debe ser mayor a cero", false)
             return
@@ -97,6 +102,28 @@ class ProductoViewModel(application: Application) : AndroidViewModel(application
                 )
 
                 if (resultado) {
+
+                    // Revisar stock bajo después de una venta exitosa.
+                    if (!entrada) {
+                        val productoActualizado =
+                            repository.obtenerProductoPorId(id)
+
+                        if (productoActualizado != null &&
+                            productoActualizado.stock <= productoActualizado.stockMinimo
+                        ) {
+                            try {
+                                NotificacionUtils.mostrarStockBajo(
+                                    getApplication(),
+                                    productoActualizado.id,
+                                    productoActualizado.nombre,
+                                    productoActualizado.stock
+                                )
+                            } catch (e: Exception) {
+                                // Si falla la notificación, la venta continúa.
+                            }
+                        }
+                    }
+
                     onResultado("Movimiento registrado correctamente", true)
                 } else {
                     onResultado(
@@ -163,6 +190,7 @@ class ProductoViewModel(application: Application) : AndroidViewModel(application
                         stockMinimo = minimoNumero
                     )
                 )
+
                 onResultado("Producto actualizado correctamente", true)
             } catch (e: Exception) {
                 onResultado("Error al actualizar el producto", false)

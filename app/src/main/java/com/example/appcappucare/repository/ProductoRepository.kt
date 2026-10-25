@@ -53,6 +53,11 @@ class ProductoRepository(
         return filasActualizadas > 0
     }
 
+    suspend fun obtenerProductoPorId(id: Int): Producto? {
+        val entidad = dao.obtenerProductoPorId(id) ?: return null
+        return Producto(entidad.id, entidad.nombre, entidad.categoria, entidad.precio, entidad.stock, entidad.stockMinimo, entidad.fotoUri)
+    }
+
     suspend fun actualizarProducto(producto: Producto) {
         val existente = dao.obtenerProductoPorId(producto.id)
             ?: throw IllegalArgumentException("Producto no encontrado")

@@ -658,6 +658,7 @@ fun FormularioProducto(
     var stock by remember { mutableStateOf("") }
     var minimo by remember { mutableStateOf("") }
     var mensaje by remember { mutableStateOf("") }
+    var mostrarErrores by remember { mutableStateOf(false) }
     var fotoProducto by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
     val contexto = androidx.compose.ui.platform.LocalContext.current
 
@@ -695,6 +696,8 @@ fun FormularioProducto(
                 )
         OutlinedTextField(
             value = nombre,
+            isError = mostrarErrores && (nombre.isBlank()),
+            supportingText = { if (mostrarErrores && (nombre.isBlank())) Text("Este campo es obligatorio") },
             onValueChange = { nombre = it },
             label = { Text("Nombre del producto") },
             leadingIcon = {
@@ -710,6 +713,8 @@ fun FormularioProducto(
 
         OutlinedTextField(
             value = categoria,
+            isError = mostrarErrores && (categoria.isBlank()),
+            supportingText = { if (mostrarErrores && (categoria.isBlank())) Text("Este campo es obligatorio") },
             onValueChange = { categoria = it },
             label = { Text("Categoría") },
             leadingIcon = {
@@ -725,6 +730,8 @@ fun FormularioProducto(
 
         OutlinedTextField(
             value = precio,
+            isError = mostrarErrores && (precio.toDoubleOrNull() == null || precio.toDoubleOrNull()!! <= 0),
+            supportingText = { if (mostrarErrores && (precio.toDoubleOrNull() == null || precio.toDoubleOrNull()!! <= 0)) Text("Ingresa un precio mayor que cero") },
             onValueChange = { nuevo ->
                 if (nuevo.matches(Regex("""\d*\.?\d*"""))) {
                     precio = nuevo
@@ -767,6 +774,8 @@ fun FormularioProducto(
                 )
         OutlinedTextField(
             value = stock,
+            isError = mostrarErrores && (stock.toIntOrNull() == null),
+            supportingText = { if (mostrarErrores && (stock.toIntOrNull() == null)) Text("Ingresa un numero valido") },
             onValueChange = { nuevo -> if (nuevo.all { it.isDigit() }) stock = nuevo },
             label = { Text("Stock inicial") },
             leadingIcon = {
@@ -782,6 +791,8 @@ fun FormularioProducto(
 
         OutlinedTextField(
             value = minimo,
+            isError = mostrarErrores && (minimo.toIntOrNull() == null),
+            supportingText = { if (mostrarErrores && (minimo.toIntOrNull() == null)) Text("Ingresa un numero valido") },
             onValueChange = { nuevo -> if (nuevo.all { it.isDigit() }) minimo = nuevo },
             label = { Text("Stock mínimo") },
             leadingIcon = {
