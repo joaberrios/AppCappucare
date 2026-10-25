@@ -1,4 +1,4 @@
-﻿package com.example.appcappucare.data.local
+package com.example.appcappucare.data.local
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -11,5 +11,6 @@ data class ProductoEntity(
     val categoria: String,
     val precio: Double,
     val stock: Int,
-    val stockMinimo: Int
+    val stockMinimo: Int,
+    val fotoUri: String? = null
 )

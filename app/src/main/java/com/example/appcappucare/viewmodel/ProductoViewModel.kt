@@ -1,4 +1,4 @@
-﻿package com.example.appcappucare.viewmodel
+package com.example.appcappucare.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -28,8 +28,7 @@ class ProductoViewModel(application: Application) : AndroidViewModel(application
         precio: String,
         stock: String,
         stockMinimo: String,
-        onResultado: (String, Boolean) -> Unit
-    ) {
+        onResultado: (String, Boolean) -> Unit, fotoUri: String? = null) {
         if (nombre.isBlank()) {
             onResultado("El nombre es obligatorio", false)
             return
@@ -65,7 +64,8 @@ class ProductoViewModel(application: Application) : AndroidViewModel(application
             categoria = categoria.trim(),
             precio = precioNumero,
             stock = stockNumero,
-            stockMinimo = minimoNumero
+            stockMinimo = minimoNumero,
+            fotoUri = fotoUri
         )
 
         viewModelScope.launch {
@@ -82,8 +82,7 @@ class ProductoViewModel(application: Application) : AndroidViewModel(application
         id: Int,
         cantidad: Int,
         entrada: Boolean,
-        onResultado: (String, Boolean) -> Unit
-    ) {
+        onResultado: (String, Boolean) -> Unit) {
         if (cantidad <= 0) {
             onResultado("La cantidad debe ser mayor a cero", false)
             return
@@ -121,5 +120,67 @@ class ProductoViewModel(application: Application) : AndroidViewModel(application
 
     fun obtenerTotalUnidades(): Int {
         return productos.value.sumOf { it.stock }
+    }
+
+    fun editarProducto(
+        producto: Producto,
+        nombre: String,
+        categoria: String,
+        precio: String,
+        stockMinimo: String,
+        onResultado: (String, Boolean) -> Unit
+    ) {
+        if (nombre.isBlank()) {
+            onResultado("El nombre es obligatorio", false)
+            return
+        }
+
+        if (categoria.isBlank()) {
+            onResultado("La categoría es obligatoria", false)
+            return
+        }
+
+        val precioNumero = precio.toDoubleOrNull()
+        val minimoNumero = stockMinimo.toIntOrNull()
+
+        if (precioNumero == null || !precioNumero.isFinite() || precioNumero <= 0) {
+            onResultado("Ingresa un precio válido mayor a cero", false)
+            return
+        }
+
+        if (minimoNumero == null || minimoNumero < 0) {
+            onResultado("Ingresa un stock mínimo válido", false)
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                repository.actualizarProducto(
+                    producto.copy(
+                        nombre = nombre.trim(),
+                        categoria = categoria.trim(),
+                        precio = precioNumero,
+                        stockMinimo = minimoNumero
+                    )
+                )
+                onResultado("Producto actualizado correctamente", true)
+            } catch (e: Exception) {
+                onResultado("Error al actualizar el producto", false)
+            }
+        }
+    }
+
+    fun eliminarProducto(
+        id: Int,
+        onResultado: (String, Boolean) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                repository.eliminarProducto(id)
+                onResultado("Producto eliminado correctamente", true)
+            } catch (e: Exception) {
+                onResultado("Error al eliminar el producto", false)
+            }
+        }
     }
 }

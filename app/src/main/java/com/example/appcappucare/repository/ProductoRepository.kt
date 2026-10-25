@@ -1,4 +1,4 @@
-﻿package com.example.appcappucare.repository
+package com.example.appcappucare.repository
 
 import com.example.appcappucare.data.local.ProductoDao
 import com.example.appcappucare.data.local.ProductoEntity
@@ -18,7 +18,8 @@ class ProductoRepository(
                 categoria = entidad.categoria,
                 precio = entidad.precio,
                 stock = entidad.stock,
-                stockMinimo = entidad.stockMinimo
+                stockMinimo = entidad.stockMinimo,
+                fotoUri = entidad.fotoUri
             )
         }
     }
@@ -30,7 +31,8 @@ class ProductoRepository(
                 categoria = producto.categoria,
                 precio = producto.precio,
                 stock = producto.stock,
-                stockMinimo = producto.stockMinimo
+                stockMinimo = producto.stockMinimo,
+                fotoUri = producto.fotoUri
             )
         )
     }
@@ -49,5 +51,23 @@ class ProductoRepository(
         }
 
         return filasActualizadas > 0
+    }
+
+    suspend fun actualizarProducto(producto: Producto) {
+        val existente = dao.obtenerProductoPorId(producto.id)
+            ?: throw IllegalArgumentException("Producto no encontrado")
+
+        dao.actualizarProducto(
+            existente.copy(
+                nombre = producto.nombre,
+                categoria = producto.categoria,
+                precio = producto.precio,
+                stockMinimo = producto.stockMinimo
+            )
+        )
+    }
+
+    suspend fun eliminarProducto(id: Int) {
+        dao.eliminarProducto(id)
     }
 }

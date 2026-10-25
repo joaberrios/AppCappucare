@@ -31,3 +31,4 @@ gradle.properties.respaldo
 *.log
 .DS_Store
 Thumbs.db
+*.respaldo*
