@@ -9,7 +9,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [ProductoEntity::class],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class CappucareDatabase : RoomDatabase() {
@@ -18,6 +18,16 @@ abstract class CappucareDatabase : RoomDatabase() {
 
     companion object {
 
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "ALTER TABLE productos ADD COLUMN idServidor INTEGER"
+        )
+        db.execSQL(
+            "CREATE UNIQUE INDEX IF NOT EXISTS index_productos_idServidor ON productos(idServidor)"
+        )
+    }
+}
         private val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL(
@@ -36,7 +46,7 @@ abstract class CappucareDatabase : RoomDatabase() {
                     CappucareDatabase::class.java,
                     "cappucare_database"
                 )
-                    .addMigrations(MIGRATION_1_2)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                     .build()
 
                 INSTANCE = instancia

@@ -1,4 +1,7 @@
 package com.example.appcappucare
+import com.example.appcappucare.data.remote.PruebaConexion
+import kotlinx.coroutines.launch
+import androidx.lifecycle.lifecycleScope
 
 import android.os.Bundle
 import androidx.compose.animation.AnimatedContent
@@ -27,6 +30,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Prueba temporal de conexion con Spring Boot
+
 
         val vm = ViewModelProvider(this)[ProductoViewModel::class.java]
 
@@ -106,6 +112,19 @@ fun CappucareApp(vm: ProductoViewModel) {
                     },
                     label = { Text("Agregar") }
                 )
+                NavigationBarItem(
+                    selected = pantalla == "medicamentos",
+                    onClick = { pantalla = "medicamentos" },
+                    icon = {
+                        Icon(
+                            painter = androidx.compose.ui.res.painterResource(
+                                android.R.drawable.ic_menu_search
+                            ),
+                            contentDescription = null
+                        )
+                    },
+                    label = { Text("Medicamentos") }
+                )
             }
         }
     ) { paddingInterno ->
@@ -134,6 +153,8 @@ fun CappucareApp(vm: ProductoViewModel) {
                         vm = vm,
                         abrirInventario = { pantalla = "inventario" }
                     )
+
+                    "medicamentos" -> com.example.appcappucare.ui.screens.MedicamentosScreen()
 
                     "agregar" -> FormularioProducto(
                         vm = vm,
@@ -242,6 +263,56 @@ fun PantallaInventario(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(productosFiltrados, key = { it.id }) { producto ->
+
+                var confirmarSincronizacion by remember(producto.id) {
+                    mutableStateOf(false)
+                }
+
+                val contextoSincronizacion =
+                    androidx.compose.ui.platform.LocalContext.current
+
+                if (confirmarSincronizacion) {
+                    AlertDialog(
+                        onDismissRequest = {
+                            confirmarSincronizacion = false
+                        },
+                        title = { Text("Sincronizar producto") },
+                        text = {
+                            Text(
+                                "Enviar ${producto.nombre} a PostgreSQL? " +
+                                "La fotografia permanecera guardada en el celular."
+                            )
+                        },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    confirmarSincronizacion = false
+
+                                    vm.sincronizarProductoConServidor(
+                                        producto.id
+                                    ) { resultado, _ ->
+                                        android.widget.Toast.makeText(
+                                            contextoSincronizacion,
+                                            resultado,
+                                            android.widget.Toast.LENGTH_LONG
+                                        ).show()
+                                    }
+                                }
+                            ) {
+                                Text("Sincronizar")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = {
+                                    confirmarSincronizacion = false
+                                }
+                            ) {
+                                Text("Cancelar")
+                            }
+                        }
+                    )
+                }
                 ElevatedCard(
                     modifier = Modifier.fillMaxWidth(),
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(22.dp),
@@ -323,6 +394,15 @@ fun PantallaInventario(
                             }
                         }
 
+                        Button(
+                            onClick = {
+                                confirmarSincronizacion = true
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Sincronizar con PostgreSQL")
+                        }
+
                         HorizontalDivider(
                             color = androidx.compose.ui.graphics.Color(0xFFE8EEF2)
                         )
@@ -368,7 +448,7 @@ fun PantallaInventario(
 
                         if (producto.stockBajo) {
                             Text(
-                                "⚠ Stock bajo",
+                                "âš  Stock bajo",
                                 color = MaterialTheme.colorScheme.error
                             )
                         }
@@ -472,7 +552,7 @@ fun PantallaInventario(
                         val numero = cantidad.toIntOrNull()
 
                         if (numero == null || numero <= 0) {
-                            mensaje = "Ingresa una cantidad válida"
+                            mensaje = "Ingresa una cantidad vÃ¡lida"
                         } else {
                             vm.registrarMovimiento(
                                 producto.id,
@@ -512,7 +592,7 @@ fun PantallaInventario(
                 Text("Eliminar producto")
             },
             text = {
-                Text("¿Seguro que deseas eliminar ${producto.nombre}? Esta acción no se puede deshacer.")
+                Text("Â¿Seguro que deseas eliminar ${producto.nombre}? Esta acciÃ³n no se puede deshacer.")
             },
             confirmButton = {
                 Button(
@@ -579,7 +659,7 @@ fun PantallaInventario(
                     OutlinedTextField(
                         value = categoriaEditar,
                         onValueChange = { categoriaEditar = it },
-                        label = { Text("Categoría") },
+                        label = { Text("CategorÃ­a") },
                         singleLine = true
                     )
 
@@ -601,7 +681,7 @@ fun PantallaInventario(
                                 minimoEditar = nuevo
                             }
                         },
-                        label = { Text("Stock mínimo") },
+                        label = { Text("Stock mÃ­nimo") },
                         singleLine = true
                     )
 
@@ -716,7 +796,7 @@ fun FormularioProducto(
             isError = mostrarErrores && (categoria.isBlank()),
             supportingText = { if (mostrarErrores && (categoria.isBlank())) Text("Este campo es obligatorio") },
             onValueChange = { categoria = it },
-            label = { Text("Categoría") },
+            label = { Text("CategorÃ­a") },
             leadingIcon = {
                 Icon(
                     painter = androidx.compose.ui.res.painterResource(android.R.drawable.ic_menu_sort_by_size),
@@ -794,7 +874,7 @@ fun FormularioProducto(
             isError = mostrarErrores && (minimo.toIntOrNull() == null),
             supportingText = { if (mostrarErrores && (minimo.toIntOrNull() == null)) Text("Ingresa un numero valido") },
             onValueChange = { nuevo -> if (nuevo.all { it.isDigit() }) minimo = nuevo },
-            label = { Text("Stock mínimo") },
+            label = { Text("Stock mÃ­nimo") },
             leadingIcon = {
                 Icon(
                     painter = androidx.compose.ui.res.painterResource(android.R.drawable.ic_dialog_alert),
@@ -826,7 +906,7 @@ com.example.appcappucare.ui.components.CamaraProducto(onFotoTomada = { foto -> f
                             imagen
                         )
                     } catch (e: Exception) {
-                        mensaje = "No se pudo guardar la fotografía"
+                        mensaje = "No se pudo guardar la fotografÃ­a"
                         return@Button
                     }
                 }

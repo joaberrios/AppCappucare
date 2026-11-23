@@ -1,4 +1,4 @@
-﻿package com.example.appcappucare.data.local
+package com.example.appcappucare.data.local
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -35,4 +35,12 @@ interface ProductoDao {
         "WHERE id = :id AND :cantidad > 0 AND stock >= :cantidad"
     )
     suspend fun descontarStock(id: Int, cantidad: Int): Int
+
+    // Productos locales que todavia no tienen ID de PostgreSQL.
+    @Query("SELECT * FROM productos WHERE idServidor IS NULL ORDER BY id ASC")
+    suspend fun obtenerProductosSinSincronizar(): List<ProductoEntity>
+
+    // Guardar la relacion entre el ID local y el ID del servidor.
+    @Query("UPDATE productos SET idServidor = :idServidor WHERE id = :id AND idServidor IS NULL")
+    suspend fun vincularProductoConServidor(id: Int, idServidor: Long): Int
 }
