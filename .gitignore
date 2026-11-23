@@ -33,6 +33,26 @@ gradle.properties.respaldo
 Thumbs.db
 *.respaldo*
 
-AppCappucare_EP2_Entrega.zip
+# Archivos de entrega y respaldos locales
+*.apk
+*.aab
+*.jks
+*.keystore
+*.bak
+*.zip
+*.antes_*
+respaldo_*/
+app/release/
 
-AppCappucare_EP2_Entrega.zip
+# Datos privados y configuracion local
+local.properties
+.env
+.env.*
+*.pem
+*.key
+
+# Archivos generados
+.gradle/
+.kotlin/
+.idea/
+**/build/

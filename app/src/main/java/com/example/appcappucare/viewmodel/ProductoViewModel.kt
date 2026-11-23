@@ -1,4 +1,4 @@
-﻿
+
 package com.example.appcappucare.viewmodel
 
 import android.app.Application
@@ -12,10 +12,16 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class ProductoViewModel(application: Application) : AndroidViewModel(application) {
+class ProductoViewModel(
+    application: Application,
+    private val repository: ProductoRepository
+) : AndroidViewModel(application) {
 
-    private val repository = ProductoRepository(
-        CappucareDatabase.obtenerBaseDatos(application).productoDao()
+    constructor(application: Application) : this(
+        application,
+        ProductoRepository(
+            CappucareDatabase.obtenerBaseDatos(application).productoDao()
+        )
     )
 
     val productos = repository.productos.stateIn(
@@ -208,6 +214,34 @@ class ProductoViewModel(application: Application) : AndroidViewModel(application
                 onResultado("Producto eliminado correctamente", true)
             } catch (e: Exception) {
                 onResultado("Error al eliminar el producto", false)
+            }
+        }
+    }
+
+    // Solicitar la sincronizacion manual de un producto.
+    fun sincronizarProductoConServidor(
+        idLocal: Int,
+        onResultado: (String, Boolean) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                val mensaje = repository.sincronizarProductoPendiente(idLocal)
+
+                val exitoso = mensaje.startsWith("Producto sincronizado:")
+
+                onResultado(mensaje, exitoso)
+
+            } catch (e: Exception) {
+                android.util.Log.e(
+                    "CAPPUCARE_SYNC",
+                    "Error al sincronizar producto",
+                    e
+                )
+
+                onResultado(
+                    "No se pudo confirmar la sincronizacion. Revisar PostgreSQL antes de reintentar.",
+                    false
+                )
             }
         }
     }
